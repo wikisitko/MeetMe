@@ -8,9 +8,11 @@ using Microsoft.EntityFrameworkCore;
 using MeetMe.Data;
 using MeetMe.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MeetMe.Controllers
 {
+    [Authorize]
     public class MeetingsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -22,10 +24,13 @@ namespace MeetMe.Controllers
             _userManager = userManager;
         }
 
+        private async Task<IdentityUser> GetUser() => await _context.Users.FirstOrDefaultAsync(x => x.Id == _userManager.GetUserId(User));
+
         // GET: Meetings
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Meeting.ToListAsync());
+            var author = await GetUser();
+            return View(await _context.Meeting.Where(x => x.Author.Id == author.Id).ToListAsync());
         }
 
         // GET: Meetings/Details/5
@@ -36,8 +41,9 @@ namespace MeetMe.Controllers
                 return NotFound();
             }
 
+            var user = await GetUser();
             var meeting = await _context.Meeting
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(m => m.Id == id && m.Author.Id == user.Id);
             if (meeting == null)
             {
                 return NotFound();
@@ -78,11 +84,18 @@ namespace MeetMe.Controllers
                 return NotFound();
             }
 
-            var meeting = await _context.Meeting.FindAsync(id);
+            var meeting = await _context.Meeting.Include(x => x.Author).FirstOrDefaultAsync(x => x.Id == id);
             if (meeting == null)
             {
                 return NotFound();
             }
+
+            var user = await GetUser();
+            if(meeting.Author.Id != user.Id)
+            {
+                return Forbid();
+            }
+
             return View(meeting);
         }
 
@@ -96,6 +109,14 @@ namespace MeetMe.Controllers
             if (id != meeting.Id)
             {
                 return NotFound();
+            }
+
+            var user = await GetUser();
+            if (await _context.Meeting
+                .Include(x => x.Author)
+                .AnyAsync(x => x.Id == id && x.Author.Id == user.Id) == false)
+            {
+                return Forbid();
             }
 
             if (ModelState.IsValid)
@@ -129,11 +150,17 @@ namespace MeetMe.Controllers
                 return NotFound();
             }
 
-            var meeting = await _context.Meeting
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var meeting = await _context.Meeting.Include(x => x.Author).FirstOrDefaultAsync(x => x.Id == id);
+
             if (meeting == null)
             {
                 return NotFound();
+            }
+
+            var user = await GetUser();
+            if (meeting.Author.Id != user.Id)
+            {
+                return Forbid();
             }
 
             return View(meeting);
@@ -144,7 +171,13 @@ namespace MeetMe.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var meeting = await _context.Meeting.FindAsync(id);
+            var meeting = await _context.Meeting.Include(x => x.Author).FirstOrDefaultAsync(x => x.Id == id);
+            var user = await GetUser();
+            if (meeting.Author.Id != user.Id)
+            {
+                return Forbid();
+            }
+
             _context.Meeting.Remove(meeting);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));

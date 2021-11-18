@@ -49,6 +49,11 @@ namespace MeetMe.Controllers
                 return NotFound();
             }
 
+            ViewBag.Attendees = await _context.Attendance
+                .Include(x => x.Attendee)
+                .Where(x => x.Meeting.Id == id)
+                .ToListAsync();
+
             return View(meeting);
         }
 
@@ -56,6 +61,55 @@ namespace MeetMe.Controllers
         public IActionResult Create()
         {
             return View();
+        }
+
+        public async Task<IActionResult> InviteUser(int? id)
+        {
+            if(id == null)
+            {
+                return BadRequest("Empty meet id");
+            }
+
+            var user = await GetUser();
+            var meeting = await _context.Meeting.FirstOrDefaultAsync(x => x.Id == id && x.Author.Id == user.Id);
+            if (meeting == null)
+            {
+                return NotFound("Nie znaleziono spotkania");
+            }
+
+            ViewBag.Users = new SelectList(await _userManager.Users.Where(x => x.Id != user.Id).ToListAsync(), "Id", "UserName");
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> InviteUser(int? id, string guestId)
+        {
+            if (id == null)
+            {
+                return BadRequest("Empty meet id");
+            }
+
+            var user = await GetUser();
+            var meeting = await _context.Meeting.FirstOrDefaultAsync(x => x.Id == id && x.Author.Id == user.Id);
+            if(meeting == null)
+            {
+                return NotFound("Nie znaleziono spotkania");
+            }
+
+            var guest = await _userManager.FindByIdAsync(guestId);
+            if(guest == null)
+            {
+                return NotFound("Nie znaleziono goscia");
+            }
+
+            var attendance = new Attendance
+            {
+                Attendee = guest,
+                Meeting = meeting,
+            };
+            await _context.AddAsync(attendance);
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Index");
         }
 
         // POST: Meetings/Create

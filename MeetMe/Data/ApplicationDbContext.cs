@@ -14,5 +14,6 @@ namespace MeetMe.Data
         {
         }
         public DbSet<MeetMe.Models.Meeting> Meeting { get; set; }
+        public DbSet<MeetMe.Models.Attendance> Attendance { get; set; }
     }
 }

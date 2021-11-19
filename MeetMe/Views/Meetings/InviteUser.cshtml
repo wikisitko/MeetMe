@@ -2,10 +2,21 @@
     ViewData["Title"] = "Invite user";
 }
 
+
+
+
+
 <form asp-action="InviteUser">
 	<div class="form-group">
 		<select name="guestId" asp-items="@ViewBag.Users" class="form-control"></select>
+		<div style="color: green;">
+			@ViewBag.MessageSuccess
+		</div>
+		<div style="color: red;">
+			@ViewBag.Message
+		</div>
 	</div>
+	
 	<div class="form-group">
 		<button type="submit" value="InviteUser" class="btn btn-success">Zaproś użytkownika</button>
 	</div>

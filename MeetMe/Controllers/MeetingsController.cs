@@ -29,8 +29,28 @@ namespace MeetMe.Controllers
         // GET: Meetings
         public async Task<IActionResult> Index()
         {
-            var author = await GetUser();
-            return View(await _context.Meeting.Where(x => x.Author.Id == author.Id).ToListAsync());
+            var user = await GetUser();
+            var invitedMeetings = await _context.Attendance
+                .Where(x => x.Attendee.Id == user.Id)
+                .Select(x => new MeetingViewModel
+                {
+                    Meeting = x.Meeting,
+                    Confirmed = x.Confirmation,
+                    IsAuthor = false
+                })
+                .ToListAsync();
+
+            var userMeetings = await _context.Meeting
+                .Where(x => x.Author.Id == user.Id)
+                .Select(x => new MeetingViewModel
+                {
+                    Meeting = x,
+                    IsAuthor = true,
+                    Confirmed = true
+                })
+                .ToListAsync();
+            
+            return View(invitedMeetings.Concat(userMeetings));
         }
 
         // GET: Meetings/Details/5
@@ -44,9 +64,16 @@ namespace MeetMe.Controllers
             var user = await GetUser();
             var meeting = await _context.Meeting
                 .FirstOrDefaultAsync(m => m.Id == id && m.Author.Id == user.Id);
+
             if (meeting == null)
             {
-                return NotFound();
+                var attendance = await _context.Attendance.Include(x => x.Meeting)
+                    .FirstOrDefaultAsync(x => x.Attendee.Id == user.Id && x.Meeting.Id == id);
+                if(attendance == null)
+                {
+                    return NotFound();
+                }
+                meeting = attendance.Meeting;
             }
 
             ViewBag.Attendees = await _context.Attendance
@@ -102,6 +129,15 @@ namespace MeetMe.Controllers
                 return NotFound("Nie znaleziono goscia");
             }
 
+            ViewBag.Users = new SelectList(await _userManager.Users.Where(x => x.Id != user.Id).ToListAsync(), "Id", "UserName");
+
+            var att = await _context.Attendance.FirstOrDefaultAsync(x => x.Attendee.Id == guest.Id && x.Meeting.Id == meeting.Id);
+            if(att != null)
+            {
+                ViewBag.Message = "Nie możesz zaprosić tej osoby.";
+                return View();
+            }
+
             var attendance = new Attendance
             {
                 Attendee = guest,
@@ -109,7 +145,9 @@ namespace MeetMe.Controllers
             };
             await _context.AddAsync(attendance);
             await _context.SaveChangesAsync();
-            return RedirectToAction("Index");
+
+            ViewBag.MessageSuccess = "Dodano osobę.";
+            return View();
         }
 
         // POST: Meetings/Create
@@ -233,6 +271,44 @@ namespace MeetMe.Controllers
             }
 
             _context.Meeting.Remove(meeting);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> Confirm(int? id)
+        {
+            if(id == null)
+            {
+                return BadRequest("Brak id");
+            }
+
+            var user = await GetUser();
+            var attendance = await _context.Attendance.FirstOrDefaultAsync(x => x.Meeting.Id == id && x.Attendee.Id == user.Id);
+            if (attendance == null)
+            {
+                return NotFound("Nie znaleziono spotkania.");
+            }
+
+            attendance.Confirmation = true;
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> DeleteAttendance(int? id) //id - id meetingu
+        {
+            if (id == null)
+            {
+                return BadRequest("Brak id");
+            }
+
+            var user = await GetUser();
+            var attendance = await _context.Attendance.FirstOrDefaultAsync(x => x.Meeting.Id == id && x.Attendee.Id == user.Id);
+            if (attendance == null)
+            {
+                return NotFound("Nie znaleziono spotkania.");
+            }
+
+            _context.Remove(attendance);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }

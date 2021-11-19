@@ -1,4 +1,4 @@
-﻿@model IEnumerable<MeetMe.Models.Meeting>
+﻿@model IEnumerable<MeetingViewModel>
 
 @{
     ViewData["Title"] = "Index";
@@ -13,13 +13,16 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Title)
+                @Html.DisplayNameFor(model => model.Meeting.Title)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.DateFrom)
+                @Html.DisplayNameFor(model => model.Meeting.DateFrom)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.DateTo)
+                @Html.DisplayNameFor(model => model.Meeting.DateTo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Confirmed)
             </th>
             <th></th>
         </tr>
@@ -28,19 +31,41 @@
 @foreach (var item in Model) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.Title)
+                @Html.DisplayFor(modelItem => item.Meeting.Title)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.DateFrom)
+                @Html.DisplayFor(modelItem => item.Meeting.DateFrom)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.DateTo)
+                @Html.DisplayFor(modelItem => item.Meeting.DateTo)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="InviteUser" asp-route-id="@item.Id">Invite user</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                @if(item.Confirmed)
+                {
+                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                          <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                        </svg>    
+                }
+            </td>
+            <td>
+                    @if(item.IsAuthor)
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.Meeting.Id">Edit</a> @("|")
+                        <a asp-action="Details" asp-route-id="@item.Meeting.Id">Details</a> @("|")
+                             <a asp-action="InviteUser" asp-route-id="@item.Meeting.Id">Invite user</a> @("|")
+                                          <a asp-action="Delete" asp-route-id="@item.Meeting.Id">Delete</a>  
+                    }
+                    else
+                    {
+                        <a asp-action="Details" asp-route-id="@item.Meeting.Id">Details</a> 
+                        @if(!item.Confirmed)
+                        {
+                            @("|")
+                            <a asp-action="Confirm" asp-route-id="@item.Meeting.Id">Confirm</a>
+                        }
+                        @("|")
+                        <a asp-action="DeleteAttendance" asp-route-id="@item.Meeting.Id">Delete invitation</a>
+                    }
             </td>
         </tr>
 }

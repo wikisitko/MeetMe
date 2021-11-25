@@ -36,10 +36,14 @@
         <tr>
             <th>Name</th>
             <th>Confirmed</th>
+            @if (ViewBag.IsAuthor)
+            {
+                <th>Delete</th>
+            }
         </tr>
         @foreach(var attendee in ViewBag.Attendees)
         {
-            <tr>
+            <tr id="@attendee.Id">
                 <td>
                     @attendee.Attendee.UserName
                 </td>
@@ -51,6 +55,18 @@
                         </svg>
                     }
                 </td>
+                
+                    @if(ViewBag.IsAuthor)
+                    {
+                        <td>
+                        @{string msg = "Czy chcesz usunąć zaproszenie dla " + attendee.Attendee.UserName;}
+                        <button onclick="setModalText('@msg', @attendee.Id)" type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+                        <i class="bi bi-x-lg"></i>
+                        </button>
+                        </td>
+                    }
+                    
+                
             </tr>
         }
     </table>
@@ -59,4 +75,27 @@
 <div>
     <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
     <a asp-action="Index">Back to List</a>
+</div>
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Potwierdzenie</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="deleteAttendance()">Delete</button>
+      </div>
+    </div>
+  </div>
 </div>

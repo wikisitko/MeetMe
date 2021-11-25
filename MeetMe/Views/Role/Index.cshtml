@@ -6,7 +6,7 @@
 
 <a asp-action="Create" class="btn btn-primary">Dodaj</a>
 
-<table class="table">
+<table class="table" id="roleTable">
     @foreach (var role in Model)
    {
        <tr>
@@ -23,3 +23,6 @@
        </tr>
    }
 </table>
+
+<input class="form-control" id="roleName"/>
+<button class="btn btn-success" onclick="addRole()">Dodaj role</button>

@@ -61,6 +61,7 @@ namespace MeetMe.Controllers
                 return NotFound();
             }
 
+            ViewBag.IsAuthor = false;
             var user = await GetUser();
             var meeting = await _context.Meeting
                 .FirstOrDefaultAsync(m => m.Id == id && m.Author.Id == user.Id);
@@ -74,6 +75,10 @@ namespace MeetMe.Controllers
                     return NotFound();
                 }
                 meeting = attendance.Meeting;
+            }
+            else
+            {
+                ViewBag.IsAuthor = true;
             }
 
             ViewBag.Attendees = await _context.Attendance
@@ -261,7 +266,7 @@ namespace MeetMe.Controllers
         // POST: Meetings/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteMeetingConfirmation(int id)
         {
             var meeting = await _context.Meeting.Include(x => x.Author).FirstOrDefaultAsync(x => x.Id == id);
             var user = await GetUser();
@@ -269,6 +274,9 @@ namespace MeetMe.Controllers
             {
                 return Forbid();
             }
+
+            var attendances = await _context.Attendance.Where(x => x.Meeting.Id == meeting.Id).ToListAsync();
+            attendances.ForEach(x => _context.Remove(x));
 
             _context.Meeting.Remove(meeting);
             await _context.SaveChangesAsync();
@@ -302,7 +310,8 @@ namespace MeetMe.Controllers
             }
 
             var user = await GetUser();
-            var attendance = await _context.Attendance.FirstOrDefaultAsync(x => x.Meeting.Id == id && x.Attendee.Id == user.Id);
+            var attendance = await _context.Attendance
+                .FirstOrDefaultAsync(x => x.Meeting.Id == id && x.Attendee.Id == user.Id);
             if (attendance == null)
             {
                 return NotFound("Nie znaleziono spotkania.");
@@ -312,6 +321,27 @@ namespace MeetMe.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+
+        public async Task<IActionResult> DeleteAttendanceByAuthor(int? id) //id - id uczestnictwa
+        {
+            if (id == null)
+            {
+                return BadRequest("Brak id");
+            }
+
+            var user = await GetUser();
+            var attendance = await _context.Attendance
+                .FirstOrDefaultAsync(x => x.Id == id && x.Meeting.Author.Id == user.Id);
+            if (attendance == null)
+            {
+                return NotFound("Nie znaleziono spotkania.");
+            }
+
+            _context.Remove(attendance);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
 
         private bool MeetingExists(int id)
         {

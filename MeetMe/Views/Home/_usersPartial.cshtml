@@ -1,0 +1,15 @@
+﻿@model List<IdentityUser>
+
+<table class="table">
+	@foreach (var user in Model)
+   {
+	   <tr>
+		   <td>
+			   @user.Email
+		   </td>
+		   <td>
+			    <a class="btn btn-success" asp-action="AddRoleToUser" asp-route-id="@user.Id">Dodaj role</a>
+		   </td>
+	   </tr>
+   }
+</table>

@@ -16,3 +16,33 @@ function sum() {
     span.innerHTML = result + "";
     document.getElementById("calculator").appendChild(span);
 }
+
+//function onGetData(res)
+//{
+//    console.log(res);
+//    alert(res);
+//}
+
+function getIp()
+{
+    $.ajax({
+        url: "https://localhost:44346/Home/GetUsers",
+        type: 'GET',
+        dataType: 'json', // tutaj mozna podac jakiego typu sa dane wynikowe
+        success: function (res) { //funkcja anonimowa cos jak w C#: res => { console.log(res); alert(res); }
+            console.log(res);
+            alert(res.ip);
+        }
+    });
+}
+
+function getUsers() {
+    $.ajax({
+        url: "/Home/GetUsers",
+        type: 'GET',
+        success: function (partialView) { //funkcja anonimowa cos jak w C#: res => { console.log(res); alert(res); }
+            //document.getElementById("users").append(partialView)
+            $('#users').append(partialView);
+        }
+    });
+}

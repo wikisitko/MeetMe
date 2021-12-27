@@ -15,3 +15,16 @@
     <button onclick="sum()" class="btn btn-danger">Oblicz</button>
     <span id="result"></span>
 </div>
+
+<button class="btn btn-success" onclick="getIp()">Moje IP</button>
+
+@*@Html.Partial("_usersPartial", ViewBag.Users as List<IdentityUser>)*@
+
+@*@{var users = ViewBag.Users as List<IdentityUser>; }
+<partial name="_usersPartial.cshtml" model="users"/>*@
+
+<div id="users"></div>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/js/home.js" asp-append-version="true"></script>
+<script>getUsers()</script>

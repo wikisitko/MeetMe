@@ -1,4 +1,5 @@
 ﻿using MeetMe.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -12,14 +13,22 @@ namespace MeetMe.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, UserManager<IdentityUser> userManager)
         {
             _logger = logger;
+            _userManager = userManager;
+        }
+
+        public IActionResult GetUsers()
+        {
+            return PartialView("_usersPartial", _userManager.Users.ToList());
         }
 
         public IActionResult Index()
         {
+            ViewBag.Users = _userManager.Users.ToList();
             return View();
         }
 

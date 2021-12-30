@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace MeetMe.Controllers
 {
@@ -6,7 +7,13 @@ namespace MeetMe.Controllers
     {
         public IActionResult Index()
         {
-            return View();
+            return View(DateTime.Now);
         }
+
+        //[HttpGet("{id}")]
+        //public IActionResult Index(string? id)
+        //{
+        //    return View(new DateTime(DateTime.Now.Year, int.Parse(id), 1));
+        //}
     }
 }

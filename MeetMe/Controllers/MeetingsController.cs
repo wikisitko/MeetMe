@@ -26,6 +26,41 @@ namespace MeetMe.Controllers
 
         private async Task<IdentityUser> GetUser() => await _context.Users.FirstOrDefaultAsync(x => x.Id == _userManager.GetUserId(User));
 
+        public async Task<IActionResult> GetMeeting(int? id)
+        {
+            if(id == null)
+            {
+                return NotFound();
+            }
+
+            ViewBag.IsAuthor = false;
+            var user = await GetUser();
+            var meeting = await _context.Meeting
+                .FirstOrDefaultAsync(m => m.Id == id && m.Author.Id == user.Id);
+
+            if (meeting == null)
+            {
+                var attendance = await _context.Attendance.Include(x => x.Meeting)
+                    .FirstOrDefaultAsync(x => x.Attendee.Id == user.Id && x.Meeting.Id == id);
+                if (attendance == null)
+                {
+                    return NotFound();
+                }
+                meeting = attendance.Meeting;
+            }
+            else
+            {
+                ViewBag.IsAuthor = true;
+            }
+
+            ViewBag.Attendees = await _context.Attendance
+                .Include(x => x.Attendee)
+                .Where(x => x.Meeting.Id == id)
+                .ToListAsync();
+
+            return PartialView("_meetingDetailsPartial", meeting);
+        }
+
         // GET: Meetings
         public async Task<IActionResult> Index()
         {

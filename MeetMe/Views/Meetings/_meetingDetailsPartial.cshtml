@@ -1,0 +1,101 @@
+﻿@model MeetMe.Models.Meeting
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Meeting</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Title)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Title)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.DateFrom)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.DateFrom)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.DateTo)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.DateTo)
+        </dd>
+    </dl>
+</div>
+<div>
+    <h4>Attendees</h4>
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Confirmed</th>
+            @if (ViewBag.IsAuthor)
+            {
+                <th>Delete</th>
+            }
+        </tr>
+        @foreach(var attendee in ViewBag.Attendees)
+        {
+            <tr id="@attendee.Id">
+                <td>
+                    @attendee.Attendee.UserName
+                </td>
+                <td>
+                    @if(attendee.Confirmation)
+                    {
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                          <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                        </svg>
+                    }
+                </td>
+                
+                    @if(ViewBag.IsAuthor)
+                    {
+                        <td>
+                        @{string msg = "Czy chcesz usunąć zaproszenie dla " + attendee.Attendee.UserName;}
+                        <button onclick="setModalText('@msg', @attendee.Id)" type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+                        <i class="bi bi-x-lg"></i>
+                        </button>
+                        </td>
+                    }
+                    
+                
+            </tr>
+        }
+    </table>
+</div>
+
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Potwierdzenie</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="deleteAttendance()">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>

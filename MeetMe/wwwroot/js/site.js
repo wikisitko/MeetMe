@@ -1,4 +1,5 @@
-﻿let selectedAttendenceId = -1;
+﻿/// <reference path="home.js" />
+let selectedAttendenceId = -1;
 
 ////function deleteRequest(url) {
 ////    const response = await fetch(url, {

@@ -1,53 +1,5 @@
-﻿@model DateTime
+﻿<div id="scheduler"></div>
 
-@{
-    string[] days = { "Mon", "Tue", "Wen", "Thu", "Fri", "Sat", "Sun" };
-    var startDate = new DateTime(Model.Year, Model.Month, 1);
-    var startDay = (int)startDate.DayOfWeek;
-    if (startDay == 0)
-    {
-        startDay = 7;
-    }
-    var month = startDate.ToString("MMMM");
-}
-
-<div class="row">
-      <div class="col-sm">
-          <button class="btn btn-success">Prev</button>
-      </div>
-      <div class="col-sm">
-          <h1>@(Char.ToUpper(month[0]) + month.Substring(1))</h1>
-      </div>
-      <div class="col-sm align-items-end">
-           <button class="btn btn-success">Next</button>
-      </div>
-</div>
-
-
-<br />
-
- <div class="row">
-        @foreach(var day in days)
-        {
-            <div class="col-sm" style="width: 50px; height: 50px">
-                  @day
-            </div>
-        }
-      </div>
-
-<div class="container">
-    @for(int i = 0, k = 0; i < 5; i++)
-    {
-        <div class="row">
-        @for(int j = 0; j < 7; j++, k++)
-        {
-               <div class="col-sm" style="width: 50px; height: 50px">
-
-                  @startDate.AddDays(k-startDay+1).Day
-
-                 </div>
-                
-        }
-      </div>
-    }
-</div>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/js/scheduler.js" asp-append-version="true"></script>
+<script>getScheduler(@DateTime.Now.Year, @DateTime.Now.Month)</script>

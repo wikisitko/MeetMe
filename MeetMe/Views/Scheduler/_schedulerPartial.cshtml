@@ -1,0 +1,93 @@
+﻿@model SchedulerViewModel
+
+@{
+    string[] days = { "Mon", "Tue", "Wen", "Thu", "Fri", "Sat", "Sun" };
+    var startDate = new DateTime(Model.Date.Year, Model.Date.Month, 1);
+    var startDay = (int)startDate.DayOfWeek;
+    if (startDay == 0)
+    {
+        startDay = 7;
+    }
+    var month = startDate.ToString("MMMM");
+}
+
+<div class="row">
+      <div class="col-sm">
+          @{ var prevMonth = Model.Date.AddMonths(-1); }
+          <button class="btn btn-success" onclick="getScheduler(@prevMonth.Year, @prevMonth.Month)">Prev</button>
+      </div>
+      <div class="col-sm">
+          <h1>@(Char.ToUpper(month[0]) + month.Substring(1)) @startDate.Year</h1>
+      </div>
+      <div class="col-sm align-items-end">
+          <button class="btn btn-warning" onclick="getScheduler(@DateTime.Now.Year, @DateTime.Now.Month)">Today</button>
+           @{ var nextMonth = Model.Date.AddMonths(1); }
+          <button class="btn btn-success" onclick="getScheduler(@nextMonth.Year, @nextMonth.Month)">Prev</button>
+      </div>
+</div>
+
+
+<br />
+
+ <div class="row">
+        @foreach(var day in days)
+        {
+            <div class="col-sm" style="width: 50px; height: 50px">
+                  @day
+            </div>
+        }
+      </div>
+
+<div class="container">
+    @for(int i = 0, k = 0; i < 5; i++)
+    {
+        <div class="row">
+        @for(int j = 0; j < 7; j++, k++)
+        {
+                var currentDate = startDate.AddDays(k - startDay + 1).Date;
+                var border = "";
+                if(currentDate == DateTime.Now.Date)
+                {
+                    border = "border-width:3px;border-style: solid;border-color: #ffc107;";
+                }
+                <div class="col-sm" style="width: 50px; height: 100px;@border">
+
+                  @currentDate.Day
+
+                  @{var meetingsPerDay = Model.Meetings.Where(x => x.Meeting.DateFrom.Date == currentDate);}
+                  @foreach(var meet in meetingsPerDay)
+                    {
+                        <div>
+                            @*<a asp-action="Details" asp-controller="Meetings" asp-route-id="@meet.Meeting.Id">@meet.Meeting.Title</a> *@
+                            <button class="btn btn-success" onclick="getMeeting(@meet.Meeting.Id)" data-toggle="modal" data-target="#meetingModal">@meet.Meeting.Title</button>
+                        </div>
+                    }
+
+                 </div>
+                
+        }
+      </div>
+    }
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="meetingModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="meetingModalBody">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/js/scheduler.js" asp-append-version="true"></script>

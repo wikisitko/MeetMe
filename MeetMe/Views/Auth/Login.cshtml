@@ -1,8 +1,8 @@
-﻿@model RegisterViewModel
+﻿@model LoginViewModel
 
-<h1>Register</h1>
+<h1>Login</h1>
 
-<form asp-controller="Auth" asp-action="Register" method="post">
+<form asp-controller="Auth" asp-action="Login" method="post">
 	<div asp-validation-summary="ModelOnly"></div>
 	<div class="form-group">
 		<label asp-for="Email"></label>
@@ -14,10 +14,10 @@
 		<input asp-for="Password" type="password" class="form-control" />
 		<span asp-validation-for="Password" style="color: red;"></span>
 	</div>
-	<div class="form-group">
-		<label asp-for="PasswordConfirmation"></label>
-		<input asp-for="PasswordConfirmation" type="password" class="form-control" />
-		<span asp-validation-for="PasswordConfirmation" style="color: red;"></span>
+	<div class="form-check">
+		<input type="checkbox" asp-for="RememberMe" class="form-check-input" />
+		<label asp-for="RememberMe"></label>
+		<span asp-validation-for="RememberMe" style="color: red;"></span>
 	</div>
-	<button class="btn btn-success" type="submit">Register</button>
+	<button class="btn btn-success" type="submit">Login</button>
 </form>

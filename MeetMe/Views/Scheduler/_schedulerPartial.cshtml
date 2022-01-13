@@ -57,9 +57,22 @@
                   @{var meetingsPerDay = Model.Meetings.Where(x => x.Meeting.DateFrom.Date == currentDate);}
                   @foreach(var meet in meetingsPerDay)
                     {
-                        <div>
+                        <div style="margin: 2px;border-width: 3px;border-color: black;border-style: solid">
+                            <div onclick="getMeeting(@meet.Meeting.Id)" data-toggle="modal" data-target="#meetingModal">@meet.Meeting.Title
+                            </div>
                             @*<a asp-action="Details" asp-controller="Meetings" asp-route-id="@meet.Meeting.Id">@meet.Meeting.Title</a> *@
-                            <button class="btn btn-success" onclick="getMeeting(@meet.Meeting.Id)" data-toggle="modal" data-target="#meetingModal">@meet.Meeting.Title</button>
+                            @*<button class="btn btn-success" onclick="getMeeting(@meet.Meeting.Id)" data-toggle="modal" data-target="#meetingModal">@meet.Meeting.Title</button>*@
+                        </div>
+                        break;
+                    }
+
+                    @if(meetingsPerDay.Count() > 1)
+                    {
+                       <div style="margin: 2px;border-width: 3px;border-color: black;border-style: solid">
+                            <div onclick="getMeetings(@currentDate.Year, @currentDate.Month, @currentDate.Day)" data-toggle="modal" data-target="#meetingModal">Jeszcze @(meetingsPerDay.Count()-1)
+                            </div>
+                            @*<a asp-action="Details" asp-controller="Meetings" asp-route-id="@meet.Meeting.Id">@meet.Meeting.Title</a> *@
+                            @*<button class="btn btn-success" onclick="getMeeting(@meet.Meeting.Id)" data-toggle="modal" data-target="#meetingModal">@meet.Meeting.Title</button>*@
                         </div>
                     }
 

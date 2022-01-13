@@ -21,3 +21,14 @@ function getMeeting(id) {
         }
     });
 }
+
+function getMeetings(year, month, day) {
+    $.ajax({
+        url: "/Scheduler/GetDayMeetings?year=" + year + "&month=" + month + "&day=" + day,
+        type: 'GET',
+        success: function (partialView) { //funkcja anonimowa cos jak w C#: res => { console.log(res); alert(res); }
+            console.log(partialView);
+            $('#meetingModalBody').html(partialView);
+        }
+    });
+}

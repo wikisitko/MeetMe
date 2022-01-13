@@ -58,32 +58,6 @@ namespace MeetMe.Controllers
             return invitedMeetings.Concat(userMeetings);
         }
 
-        private async Task<IEnumerable<MeetingViewModel>> GetMeetingsFromDay(DateTime date)
-        {
-            var user = await GetUser();
-            var invitedMeetings = await _context.Attendance
-                .Where(x => x.Attendee.Id == user.Id && x.Meeting.DateFrom.Date == date.Date)
-                .Select(x => new MeetingViewModel
-                {
-                    Meeting = x.Meeting,
-                    Confirmed = x.Confirmation,
-                    IsAuthor = false
-                })
-                .ToListAsync();
-
-            var userMeetings = await _context.Meeting
-                .Where(x => x.Author.Id == user.Id && x.DateFrom.Date == date.Date)
-                .Select(x => new MeetingViewModel
-                {
-                    Meeting = x,
-                    IsAuthor = true,
-                    Confirmed = true
-                })
-                .ToListAsync();
-
-            return invitedMeetings.Concat(userMeetings);
-        }
-
         public async Task<IActionResult> GetScheduler(int year, int month)
         {
             DateTime date = DateTime.Now;
@@ -97,21 +71,6 @@ namespace MeetMe.Controllers
             }
             var meetings = await GetMeetingsFromMonth(date);
             return PartialView("_schedulerPartial", new SchedulerViewModel { Date=date, Meetings=meetings});
-        }
-
-        public async Task<IActionResult> GetDayMeetings(int year, int month, int day)
-        {
-            DateTime date = DateTime.Now;
-            try
-            {
-                date = new DateTime(year, month, day);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
-            var meetings = await GetMeetingsFromDay(date); //tytaj pobrac meetingi z dnia
-            return PartialView("_moreMeetingsPartial", meetings); //tutaj przekazaac meeting z dnia
         }
     }
 }

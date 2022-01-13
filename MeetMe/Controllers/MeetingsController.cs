@@ -382,5 +382,46 @@ namespace MeetMe.Controllers
         {
             return _context.Meeting.Any(e => e.Id == id);
         }
+
+        public async Task<IActionResult> GetDayMeetings(int year, int month, int day)
+        {
+            DateTime date = DateTime.Now;
+            try
+            {
+                date = new DateTime(year, month, day);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            var meetings = await GetMeetingsFromDay(date); //tytaj pobrac meetingi z dnia
+            return PartialView("_meetingsListPartial", meetings); //tutaj przekazaac meeting z dnia
+        }
+
+        private async Task<IEnumerable<MeetingViewModel>> GetMeetingsFromDay(DateTime date)
+        {
+            var user = await GetUser();
+            var invitedMeetings = await _context.Attendance
+                .Where(x => x.Attendee.Id == user.Id && x.Meeting.DateFrom.Date == date.Date)
+                .Select(x => new MeetingViewModel
+                {
+                    Meeting = x.Meeting,
+                    Confirmed = x.Confirmation,
+                    IsAuthor = false
+                })
+                .ToListAsync();
+
+            var userMeetings = await _context.Meeting
+                .Where(x => x.Author.Id == user.Id && x.DateFrom.Date == date.Date)
+                .Select(x => new MeetingViewModel
+                {
+                    Meeting = x,
+                    IsAuthor = true,
+                    Confirmed = true
+                })
+                .ToListAsync();
+
+            return invitedMeetings.Concat(userMeetings);
+        }
     }
 }

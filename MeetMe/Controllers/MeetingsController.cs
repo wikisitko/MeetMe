@@ -64,6 +64,17 @@ namespace MeetMe.Controllers
         // GET: Meetings
         public async Task<IActionResult> Index()
         {
+            var user2 = await GetUser();
+            _context.Add(new Message
+            {
+                Id = 1,
+                Text = "test",
+                UserFrom = user2,
+                UserTo = user2
+            });;
+            await _context.SaveChangesAsync();
+
+
             var user = await GetUser();
             var invitedMeetings = await _context.Attendance
                 .Where(x => x.Attendee.Id == user.Id)
